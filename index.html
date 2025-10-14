@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador de Propuestas Presidenciales 2026</title>
+    <!-- Chosen Palette: Complementaria Digital (Rojo, Amarillo, Azul, Verde) -->
+    <!-- Application Structure Plan: A single-page application with a top navigation bar for smooth scrolling to thematic sections (Economía, Impuestos, Seguridad, Salud y Pensiones, Análisis Gráfico). This thematic structure, rather than a candidate-centric one, facilitates direct comparison of policies on a specific topic, which is the primary user goal. An interactive graphical analysis section uses spectrum charts to visually synthesize the ideological positioning of candidates, offering a quick overview before diving into textual details. Cards are used for a clean, modular, and responsive presentation. -->
+    <!-- Visualization & Content Choices: Info: Candidate proposals across 3 areas. Goal: Compare policies and ideological stances. Viz: HTML/Tailwind cards for text comparison; Chart.js horizontal bar charts (spectrum visualization) for ideological summary. Interaction: Nav buttons for scrolling, tooltips on charts. Justification: The combination of detailed text (in cards) and a high-level visual summary (charts) caters to different user needs. Spectrum charts effectively translate qualitative policy stances into a quantitative, easy-to-understand visual comparison of ideological alignment (State vs. Market). This avoids complex data tables and provides an engaging infographic-style summary. Library: Chart.js (Canvas). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDF7E8; /* Background 2 Amarillo */
+            color: #3d3d3d;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        .candidate-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background-color: #E1E9FD; /* Background 2 Azul para contraste de tarjetas */
+        }
+        .nav-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+        .nav-button.active {
+            background-color: #005FFF; /* Azul */
+            color: white;
+        }
+        .text-accent {
+            color: #F40034; /* Rojo */
+        }
+    </style>
+</head>
+<body class="bg-yellow-50 text-stone-800">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-accent mb-2">Comparador de Propuestas Presidenciales</h1>
+            <p class="text-lg text-stone-600">Una herramienta interactiva para analizar y contrastar los programas de gobierno.</p>
+        </header>
+
+        <nav class="sticky top-0 z-10 bg-yellow-50/80 backdrop-blur-sm py-4 mb-12 border-b border-stone-200">
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4">
+                <button onclick="scrollToSection('vision-general')" class="nav-button active text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-white shadow-sm hover:bg-red-600 hover:text-white">Visión General</button>
+                <button onclick="scrollToSection('economia')" class="nav-button text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-white shadow-sm hover:bg-red-600 hover:text-white">Economía General</button>
+                <button onclick="scrollToSection('impuestos')" class="nav-button text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-white shadow-sm hover:bg-red-600 hover:text-white">Impuestos y Finanzas</button>
+                <button onclick="scrollToSection('seguridad')" class="nav-button text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-white shadow-sm hover:bg-red-600 hover:text-white">Seguridad</button>
+                <button onclick="scrollToSection('salud-pensiones')" class="nav-button text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-white shadow-sm hover:bg-red-600 hover:text-white">Salud y Pensiones</button>
+                <button onclick="scrollToSection('analisis')" class="nav-button text-sm md:text-base font-semibold px-4 py-2 rounded-full bg-white shadow-sm hover:bg-red-600 hover:text-white">Análisis Gráfico</button>
+            </div>
+        </nav>
+
+        <main id="main-content">
+
+            <section id="vision-general" class="mb-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Visión General de Candidatos</h2>
+                <p class="text-center max-w-3xl mx-auto mb-10 text-stone-600">
+                    A continuación se presenta un resumen de los pilares fundamentales de cada candidatura. Utiliza los filtros del menú superior para navegar directamente a las áreas temáticas de tu interés y explorar las propuestas en mayor detalle.
+                </p>
+                <div id="overview-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </section>
+            
+            <section id="economia" class="mb-16 pt-16 -mt-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Economía General y Crecimiento</h2>
+                 <p class="text-center max-w-3xl mx-auto mb-10 text-stone-600">
+                    Esta sección detalla las propuestas macroeconómicas de cada candidato, incluyendo sus planes para el crecimiento del PIB, el fomento a las PYMES y el manejo del gasto público general.
+                </p>
+                <div id="economia-grid" class="space-y-8"></div>
+            </section>
+
+            <!-- NUEVA SECCIÓN DE IMPUESTOS -->
+            <section id="impuestos" class="mb-16 pt-16 -mt-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Análisis Tributario: Impuestos a Empresas y Personas</h2>
+                 <p class="text-center max-w-3xl mx-auto mb-10 text-stone-600">
+                    Aquí se detallan las propuestas específicas de cada candidato sobre el sistema tributario, incluyendo cambios en las tasas de impuesto corporativo, el Impuesto al Valor Agregado (IVA), impuestos a la riqueza y otros gravámenes específicos.
+                </p>
+                <div id="impuestos-grid" class="space-y-8"></div>
+            </section>
+            <!-- FIN NUEVA SECCIÓN DE IMPUESTOS -->
+
+
+            <section id="seguridad" class="mb-16 pt-16 -mt-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Seguridad Pública</h2>
+                 <p class="text-center max-w-3xl mx-auto mb-10 text-stone-600">
+                    Aquí se exponen las estrategias para abordar la seguridad, el orden público y el control fronterizo. Analiza las medidas propuestas para combatir el crimen organizado, modernizar las policías y reformar el sistema penitenciario, temas de alta prioridad para la ciudadanía.
+                </p>
+                <div id="seguridad-grid" class="space-y-8"></div>
+            </section>
+
+            <section id="salud-pensiones" class="mb-16 pt-16 -mt-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Salud y Sistema de Pensiones</h2>
+                 <p class="text-center max-w-3xl mx-auto mb-10 text-stone-600">
+                    Compara los planes para reformar los sistemas de salud y de pensiones, incluyendo el futuro de las AFP e ISAPRE. Esta área es fundamental para el bienestar y la seguridad social de todos los chilenos, con propuestas que van desde la reforma del sistema actual hasta su completa reestructuración.
+                </p>
+                <div id="salud-pensiones-grid" class="space-y-8"></div>
+            </section>
+
+            <section id="analisis" class="pt-16 -mt-16">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Análisis Gráfico: Espectro Ideológico</h2>
+                <p class="text-center max-w-3xl mx-auto mb-10 text-stone-600">
+                    Estos gráficos visualizan la posición ideológica de los candidatos en dos dimensiones clave: el modelo económico y el sistema de seguridad social. Permiten una comparación rápida de sus enfoques, desde una mayor intervención estatal hasta un un mayor protagonismo del mercado y la libertad individual.
+                </p>
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-12">
+                    <h3 class="text-xl font-bold text-center mb-4">Modelo Económico</h3>
+                    <div class="chart-container">
+                        <canvas id="economicSpectrumChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center mb-4">Modelo de Salud y Pensiones</h3>
+                    <div class="chart-container">
+                        <canvas id="socialSpectrumChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const newColors = {
+            Rojo: '#F40034',
+            Amarillo: '#F9B316',
+            Azul: '#005FFF',
+            Verde: '#59A80F',
+            // Colores específicos para candidatos o contrastes en el gráfico
+            Artés: '#A30000', 
+            MEO: '#FF7F00', 
+            Jara: '#F40D67' 
+        };
+
+        const candidateColorMap = {
+            "Evelyn Matthei": { class: "bg-blue-600", hex: newColors.Azul },
+            "José Antonio Kast": { class: "bg-red-700", hex: newColors.Rojo },
+            "Franco Parisi": { class: "bg-yellow-500", hex: newColors.Amarillo },
+            "Jeannette Jara": { class: "bg-rose-500", hex: newColors.Jara },
+            "Harold Mayne-Nicholls": { class: "bg-green-600", hex: newColors.Verde },
+            "Eduardo Artés": { class: "bg-red-900", hex: newColors.Artés },
+            "Johannes Kaiser": { class: "bg-indigo-700", hex: newColors.Azul }, 
+            "Marco Enríquez-Ominami": { class: "bg-orange-500", hex: newColors.MEO } 
+        };
+
+        const proposalsData = {
+            "Evelyn Matthei": {
+                color: candidateColorMap["Evelyn Matthei"].class,
+                economia: "Crecimiento al 4% del PIB, reducción de impuesto corporativo al 23%, fin a la permisología y creación de 1 millón de empleos. [Ref: p. 20-21]",
+                impuestos: "Reducción inmediata de I. Corporativo al 23% (meta 18%). Restablecimiento de régimen integrado para reinversión. Sin impuesto a la riqueza. IVA se mantiene. [Ref: p. 20]",
+                seguridad: "Inversión de US$2.500 millones, creación de UNICOT contra crimen organizado, 5 nuevas cárceles y Policía Militar Fronteriza. [Ref: p. 13-15]",
+                salud_pensiones: "Reducir listas de espera en salud, declarar alerta sanitaria por cáncer. Sin propuestas detalladas de desmantelamiento de AFP/ISAPRE, pero con nueva cobertura GES de medicamentos. [Ref: p. 29-31]"
+            },
+            "José Antonio Kast": {
+                color: candidateColorMap["José Antonio Kast"].class,
+                economia: "Reactivación y libre mercado, aceleración del crecimiento económico. Foco en la iniciativa privada como fuente de empleo y reducción de gastos estatales. [Ref: p. 27-28]",
+                impuestos: "Rebaja de I. Corporativo. Énfasis en la eliminación gradual de Contribuciones a la primera vivienda (partiendo por adultos mayores). Fuerte foco en la fiscalización tributaria. [Ref: p. 37-38]",
+                seguridad: "Recuperación del orden y autoridad, uso de la fuerza del Estado. Cierre fronterizo a la inmigración ilegal y construcción de cárceles de alta seguridad. [Ref: p. 19-23]",
+                salud_pensiones: "Emergencia sanitaria por listas de espera. En AFP, todo el aporte a la cuenta individual, revirtiendo el préstamo al Estado. Fortalecer FONASA con Modalidad de Cobertura Complementaria (MCC). [Ref: p. 33-38]"
+            },
+            "Franco Parisi": {
+                color: candidateColorMap["Franco Parisi"].class,
+                economia: "Eliminación del IVA a medicamentos y canasta básica. Exención tributaria para nuevos emprendimientos e implementación de Impuesto al Patrimonio. [Ref: p. 70-74]",
+                impuestos: "Eliminación del IVA a medicamentos y devolución universal de IVA en canasta básica. Exención tributaria temporal para nuevos emprendimientos. Implementación de Impuesto al Patrimonio. [Ref: p. 70-74]",
+                seguridad: "Plan GOFRA con drones para fronteras, creación de una Policía Municipal Armada y modificación de la Ley de Tránsito para rastrear vehículos robados. [Ref: p. 41-61]",
+                salud_pensiones: "Ficha Clínica Única y Consultas Médicas Grupales. En AFP, permitir autopréstamo para vivienda. En salud, incorporar cobertura dental en la licitación del MCC de Fonasa. [Ref: p. 24-33, 66]"
+            },
+            "Jeannette Jara": {
+                color: candidateColorMap["Jeannette Jara"].class,
+                economia: "Crecimiento justo y sostenible enfocado en transición energética. Propuesta de Ingreso Vital de $750.000 gradual. [Ref: p. 9-12, 28-30]",
+                impuestos: "Promoverá un Subsidio a PYMEs para Ingreso Vital y aumento de la carga impositiva a los altos ingresos y sectores pudientes. IVA diferenciado (sin tasa específica). [Ref: p. 9-12, 28-30]",
+                seguridad: "Fortalecimiento de la Agencia Nacional de Control de Armas (ANCA), expansión de equipos ECOH a todo el país y plan de infraestructura penitenciaria. [Ref: p. 32-41]",
+                salud_pensiones: "Declarar emergencia sanitaria por listas de espera. Fortalecer FONASA con MCC para 8 millones de beneficiarios. En AFP, abordar financiamiento de PGU y fortalecer la propiedad individual de los fondos. [Ref: p. 47-50, 62-64]"
+            },
+            "Harold Mayne-Nicholls": {
+                color: candidateColorMap["Harold Mayne-Nicholls"].class,
+                economia: "Reactivación con apoyo a familias (bonos de invierno), refuerzo de InvestChile y Plan de Obras Públicas para generar empleo. [Ref: p. 12-16]",
+                impuestos: "Ajustes tributarios orientados a la eficiencia. Propone avanzar gradualmente a Impuestos Verdes. Revisión de exenciones tributarias regresivas. [Ref: p. 26, 34-35]",
+                seguridad: "Comité Nacional de Seguridad semanal, controles fronterizos exhaustivos ('cercar la frontera') y programa 'Esquinas Deportivas' para prevención en jóvenes. [Ref: p. 9-12]",
+                salud_pensiones: "Sistema de salud humanizado, foco en reducción de tiempos de espera y salud mental. Menciona la necesidad de revisar el sistema de pensiones y supervisar a las ISAPRE, fortaleciendo la PGU. [Ref: p. 17-18]"
+            },
+            "Eduardo Artés": {
+                color: candidateColorMap["Eduardo Artés"].class,
+                economia: "Revolución Socialista: Nacionalización y expropiación de empresas estratégicas. Economía basada en planificación quinquenal. [Ref: p. 10-14, 19]",
+                impuestos: "Nacionalización de monopolios. Aumento de la carga a la gran fortuna y patrimonio. Reducción gradual del IVA hasta su eliminación total. [Ref: p. 19]",
+                seguridad: "Combatir el crimen organizado con 'brigadas de defensa popular'. Refundación de las Fuerzas Armadas y de Orden. Rechazo a la inmigración incontrolada. [Ref: p. 24-25, 34-35]",
+                salud_pensiones: "Supresión total del sistema de AFP y retorno a un sistema de reparto solidario. En salud, un sistema único y estatal, con apertura inmediata de clínicas militares al público. [Ref: p. 24-30]"
+            },
+            "Johannes Kaiser": {
+                color: candidateColorMap["Johannes Kaiser"].class,
+                economia: "Reforma pro-emprendimiento: 0% de impuesto a utilidades reinvertidas, eliminación de contribuciones e invariabilidad tributaria por 50 años. [Ref: p. 23-30]",
+                impuestos: "0% I. a utilidades reinvertidas. I. Corporativo al 15% (sobre utilidades retiradas). Eliminación de Contribuciones e I. a ganancias bursátiles. [Ref: p. 23-30]",
+                seguridad: "Estado fuerte, no policiaco. Plan de construcción de cárceles de máxima seguridad y penalización del ingreso ilegal con prisión y expulsión. [Ref: p. 70-85]",
+                salud_pensiones: "Liberalización del mercado de la salud. En AFP, eliminar fondos generacionales y bonificar el APV. La PGU se financiará con la monetización de activos estatales. Aboga por la libertad de elección en ISAPRE. [Ref: p. 61-69, 104-108]"
+            },
+            "Marco Enríquez-Ominami": {
+                color: candidateColorMap["Marco Enríquez-Ominami"].class,
+                economia: "Nueva alianza Estado/Mercado. Reducción moderada de impuesto corporativo (20%). Impuesto a las grandes fortunas. Énfasis en Economía Azul e Hidrógeno Verde. [Ref: p. 7-12]",
+                impuestos: "I. Corporativo al 20% (sujeto a reinversión). I. a las Grandes Fortunas (0,5% anual). IVA Diferenciado del 10% para alimentos/medicamentos/libros. Igualar I. a la Renta de trabajo y capital. [Ref: p. 9-11]",
+                seguridad: "SNIC (Sistema Nacional de Inteligencia Criminal), Policía de Barrios, protección militar de infraestructura crítica y triplicar inversión en prevención juvenil. [Ref: p. 16-20]",
+                salud_pensiones: "SNP (Sistema Nacional de Pensiones) con cuentas nacionales. PGU escalonada ($250.000 meta). Reforma a la previsión de FF.AA. Contratación de 1.000 profesionales en salud mental. [Ref: p. 22-24, 34-36]"
+            }
+        };
+
+        function createCard(candidate, data, sectionId) {
+            let content = '';
+            switch(sectionId) {
+                case 'economia-grid':
+                    content = `<p class="text-stone-600">${data.economia}</p>`;
+                    break;
+                case 'impuestos-grid':
+                    content = `<p class="text-stone-600">${data.impuestos}</p>`;
+                    break;
+                case 'seguridad-grid':
+                    content = `<p class="text-stone-600">${data.seguridad}</p>`;
+                    break;
+                case 'salud-pensiones-grid':
+                    content = `<p class="text-stone-600">${data.salud_pensiones}</p>`;
+                    break;
+                default: // overview-grid
+                    content = `
+                        <h4 class="font-semibold text-accent">Economía:</h4>
+                        <p class="text-sm text-stone-600 mb-2">${data.economia}</p>
+                        <h4 class="font-semibold text-accent">Impuestos:</h4>
+                        <p class="text-sm text-stone-600 mb-2">${data.impuestos}</p>
+                        <h4 class="font-semibold text-accent">Seguridad:</h4>
+                        <p class="text-sm text-stone-600 mb-2">${data.seguridad}</p>
+                        <h4 class="font-semibold text-accent">Salud/Pensiones:</h4>
+                        <p class="text-sm text-stone-600">${data.salud_pensiones}</p>
+                    `;
+            }
+
+            const cardHTML = `
+                <div class="candidate-card rounded-xl shadow-md overflow-hidden p-6 border-t-4 ${data.color.replace('bg-', 'border-')}">
+                    <h3 class="text-2xl font-bold mb-4 text-stone-800">${candidate}</h3>
+                    <div class="space-y-3">
+                        ${content}
+                    </div>
+                </div>
+            `;
+            return cardHTML;
+        }
+
+        function renderContent() {
+            const overviewGrid = document.getElementById('overview-grid');
+            const economiaGrid = document.getElementById('economia-grid');
+            const impuestosGrid = document.getElementById('impuestos-grid');
+            const seguridadGrid = document.getElementById('seguridad-grid');
+            const saludPensionesGrid = document.getElementById('salud-pensiones-grid');
+
+            overviewGrid.innerHTML = '';
+            economiaGrid.innerHTML = '';
+            impuestosGrid.innerHTML = '';
+            seguridadGrid.innerHTML = '';
+            saludPensionesGrid.innerHTML = '';
+            
+            for (const [candidate, data] of Object.entries(proposalsData)) {
+                overviewGrid.innerHTML += createCard(candidate, data, 'overview-grid');
+                economiaGrid.innerHTML += createCard(candidate, data, 'economia-grid');
+                impuestosGrid.innerHTML += createCard(candidate, data, 'impuestos-grid');
+                seguridadGrid.innerHTML += createCard(candidate, data, 'seguridad-grid');
+                saludPensionesGrid.innerHTML += createCard(candidate, data, 'salud-pensiones-grid');
+            }
+        }
+        
+        function scrollToSection(sectionId) {
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderContent();
+
+            const spectrumData = {
+                labels: Object.keys(proposalsData),
+                economic: {
+                    'Eduardo Artés': -9,
+                    'Harold Mayne-Nicholls': -3,
+                    'Jeannette Jara': -2,
+                    'Franco Parisi': 0,
+                    'Marco Enríquez-Ominami': -4,
+                    'Evelyn Matthei': 5,
+                    'José Antonio Kast': 8,
+                    'Johannes Kaiser': 9,
+                },
+                social: {
+                    'Eduardo Artés': -10,
+                    'Harold Mayne-Nicholls': -2,
+                    'Jeannette Jara': 1,
+                    'Marco Enríquez-Ominami': -5,
+                    'Franco Parisi': 3,
+                    'Evelyn Matthei': 6,
+                    'José Antonio Kast': 8,
+                    'Johannes Kaiser': 9,
+                }
+            };
+
+            const sortedCandidates = Object.entries(spectrumData.economic).sort(([,a],[,b]) => a-b).map(([name]) => name);
+
+            const getBarColor = (candidate) => {
+                const map = {
+                    "Evelyn Matthei": candidateColorMap["Evelyn Matthei"].hex,
+                    "José Antonio Kast": candidateColorMap["José Antonio Kast"].hex,
+                    "Franco Parisi": candidateColorMap["Franco Parisi"].hex,
+                    "Jeannette Jara": candidateColorMap["Jeannette Jara"].hex,
+                    "Harold Mayne-Nicholls": candidateColorMap["Harold Mayne-Nicholls"].hex,
+                    "Eduardo Artés": candidateColorMap["Eduardo Artés"].hex,
+                    "Johannes Kaiser": candidateColorMap["Johannes Kaiser"].hex,
+                    "Marco Enríquez-Ominami": candidateColorMap["Marco Enríquez-Ominami"].hex,
+                };
+                return map[candidate];
+            };
+
+            const createSpectrumChart = (canvasId, dataKey, title, leftLabel, rightLabel) => {
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                
+                const chartData = {
+                    labels: sortedCandidates,
+                    datasets: [{
+                        label: title,
+                        data: sortedCandidates.map(c => spectrumData[dataKey][c]),
+                        backgroundColor: sortedCandidates.map(c => getBarColor(c)),
+                        borderColor: sortedCandidates.map(c => getBarColor(c)),
+                        borderWidth: 1,
+                        barPercentage: 0.6,
+                    }]
+                };
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        indexAxis: 'y',
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: {
+                            x: {
+                                min: -10,
+                                max: 10,
+                                grid: {
+                                    color: '#e7e5e4',
+                                    borderColor: '#9ca3af',
+                                    borderDash: [5, 5],
+                                },
+                                ticks: {
+                                    stepSize: 2
+                                },
+                                title: {
+                                    display: true,
+                                    text: `${leftLabel} <---> ${rightLabel}`,
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        const value = context.raw;
+                                        const intensityLabel = value > 0 ? rightLabel : leftLabel;
+                                        if (Math.abs(value) > 5) label += `Fuerte enfoque en ${intensityLabel}`;
+                                        else if (Math.abs(value) > 0) label += `Moderado enfoque en ${intensityLabel}`;
+                                        else label += 'Enfoque de Centro / Mixto';
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            createSpectrumChart('economicSpectrumChart', 'economic', 'Espectro Económico', 'Más Estado', 'Más Mercado');
+            createSpectrumChart('socialSpectrumChart', 'social', 'Espectro Social', 'Sistema Colectivo', 'Sistema Individual');
+
+            const sections = document.querySelectorAll('main section');
+            const navButtons = document.querySelectorAll('.nav-button');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navButtons.forEach(button => {
+                            if (button.getAttribute('onclick') === `scrollToSection('${entry.target.id}')`) {
+                                button.classList.add('active');
+                            } else {
+                                button.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+
+    </script>
+
+</body>
+</html>
